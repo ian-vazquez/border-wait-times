@@ -73,7 +73,8 @@ for code, name in ports.items():
 df = pd.DataFrame(final_result)
 df["timestamp"] = datetime.now()
 
-csv_path = "../data/raw/wait_times.csv"
+script_folder = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(script_folder, "..", "data", "raw", "wait_times.csv")
 file_exists = os.path.exists(csv_path)
 df.to_csv(csv_path, mode="a", header=not file_exists, index=False)
 print("Done")
