@@ -1,0 +1,29 @@
+port_name,category,lane_type,status,wait_minutes,timestamp
+Bridge of the Americas,Commercial Vehicles,General,closed,,2026-08-09 15:26:14.176934
+Bridge of the Americas,Commercial Vehicles,Fast,closed,,2026-08-09 15:26:14.176934
+Bridge of the Americas,Passenger Vehicles,General,reported,50.0,2026-08-09 15:26:14.176934
+Bridge of the Americas,Passenger Vehicles,Sentri,not applicable,,2026-08-09 15:26:14.176934
+Bridge of the Americas,Passenger Vehicles,Ready,reported,45.0,2026-08-09 15:26:14.176934
+Bridge of the Americas,Pedestrian,General,reported,1.0,2026-08-09 15:26:14.176934
+Bridge of the Americas,Pedestrian,Ready,reported,1.0,2026-08-09 15:26:14.176934
+Paso Del Norte,Commercial Vehicles,General,not applicable,,2026-08-09 15:26:14.176934
+Paso Del Norte,Commercial Vehicles,Fast,not applicable,,2026-08-09 15:26:14.176934
+Paso Del Norte,Passenger Vehicles,General,reported,54.0,2026-08-09 15:26:14.176934
+Paso Del Norte,Passenger Vehicles,Sentri,reported,5.0,2026-08-09 15:26:14.176934
+Paso Del Norte,Passenger Vehicles,Ready,reported,50.0,2026-08-09 15:26:14.176934
+Paso Del Norte,Pedestrian,General,reported,8.0,2026-08-09 15:26:14.176934
+Paso Del Norte,Pedestrian,Ready,reported,5.0,2026-08-09 15:26:14.176934
+Ysleta,Commercial Vehicles,General,closed,,2026-08-09 15:26:14.176934
+Ysleta,Commercial Vehicles,Fast,closed,,2026-08-09 15:26:14.176934
+Ysleta,Passenger Vehicles,General,closed,,2026-08-09 15:26:14.176934
+Ysleta,Passenger Vehicles,Sentri,reported,1.0,2026-08-09 15:26:14.176934
+Ysleta,Passenger Vehicles,Ready,reported,35.0,2026-08-09 15:26:14.176934
+Ysleta,Pedestrian,General,reported,5.0,2026-08-09 15:26:14.176934
+Ysleta,Pedestrian,Ready,not applicable,,2026-08-09 15:26:14.176934
+Stanton,Commercial Vehicles,General,not applicable,,2026-08-09 15:26:14.176934
+Stanton,Commercial Vehicles,Fast,not applicable,,2026-08-09 15:26:14.176934
+Stanton,Passenger Vehicles,General,closed,,2026-08-09 15:26:14.176934
+Stanton,Passenger Vehicles,Sentri,reported,1.0,2026-08-09 15:26:14.176934
+Stanton,Passenger Vehicles,Ready,not applicable,,2026-08-09 15:26:14.176934
+Stanton,Pedestrian,General,not applicable,,2026-08-09 15:26:14.176934
+Stanton,Pedestrian,Ready,not applicable,,2026-08-09 15:26:14.176934
