@@ -37,6 +37,9 @@ def get_port_data(port_code, port_name):
             elif "N/A" in currentLane: 
                 status = "not applicable"
 
+            elif "Pending" in currentLane:
+                status = "not applicable"
+
             else: 
                 status = "reported"
 
