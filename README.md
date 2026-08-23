@@ -58,11 +58,3 @@ categories, including General, Fast, Sentri, and Ready lane types.
   Actions and commits new data automatically, with zero manual intervention
 - `notebooks/exploratory_analysis.ipynb` — the analysis behind these findings
 - `data/raw/wait_times.csv` — the accumulating dataset
-
-## Why this project
-
-This is a preliminary exploration using the same wait-time data source the
-Sharma/Mudgal (2021) border wait-time prediction methodology uses, done ahead
-of a proposed research collaboration with UTEP's Center for Transportation
-Infrastructure Systems, pairing this dataset with Fix El Paso's
-infrastructure-report data.
