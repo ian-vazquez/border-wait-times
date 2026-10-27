@@ -52,7 +52,56 @@ categories, including General, Fast, Sentri, and Ready lane types.
 - `scraper/collect.py` — fetches and parses the CBP feeds, handling four
   distinct data states (numeric readings, closed lanes, not-applicable lane
   types, and pending updates)
+
 - `.github/workflows/scrape.yml` — runs the scraper hourly via GitHub
   Actions and commits new data automatically, with zero manual intervention
 - `notebooks/exploratory_analysis.ipynb` — the analysis behind these findings
 - `data/raw/wait_times.csv` — the accumulating dataset
+
+
+# Border Wait Time Predictions
+
+Novel wait time predictions for each port, lane type, and hour for the population of El Paso.
+
+## Data 
+
+- Date Range: August 9th to September 28.
+- Only rows with a numeric wait time 6782/15064 were considered.
+- Features: port, category, lane type, and hour/day of week (encoded as sine/cosine pairs to ensure hours like 21:00 and 0:00 are neighbors).
+
+## Tests
+
+- Split dataset into standard 80/20 training and testing sets by time to ensure neighboring rows landed together. 
+
+## Results 
+
+| Method | MAE (minutes) |
+|--------|---------------|
+| Training median for every row | 18.10 |
+| Port/hour lookup | 19.03 |
+| Linear Regression | 10.74 |
+| Port, category, lane type, and hour lookup | 9.81 | 
+| Random Forest | 8.07 |
+
+## Takeaways 
+
+- More features usually indicated higher accuracy
+- Random forest displayed mild overfitting (5.14 vs 8.07)
+
+## Limitations 
+
+- 7 weeks of data
+- One train/test split
+- Collection gaps due to GitHub cron scheduling
+- No tuning
+
+## Next Steps
+
+- More weeks of data from an external trigger for steadier collection.
+- Further testing with different prediction models
+
+
+
+
+
+
