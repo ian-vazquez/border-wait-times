@@ -58,6 +58,8 @@ categories, including General, Fast, Sentri, and Ready lane types.
 - `notebooks/exploratory_analysis.ipynb` — the analysis behind these findings
 - `data/raw/wait_times.csv` — the accumulating dataset
 
+<br><br>
+<br><br>
 
 # Border Wait Time Predictions
 
