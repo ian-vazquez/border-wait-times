@@ -5,11 +5,9 @@ data across El Paso's four ports of entry, running unattended via GitHub Actions
 
 ## What this is
 
-A sister project to Fix El Paso: this repo scrapes CBP's live border wait-time
+This repo scrapes CBP's live border wait-time
 feeds hourly, accumulates a growing dataset with zero manual intervention, and
-analyzes patterns in crossing times across El Paso's bridges. It doubles as
-preliminary prep work for a proposed research collaboration with UTEP.
-
+analyzes patterns in crossing times across El Paso's bridges. 
 ## Data source
 
 Live RSS feeds from [bwt.cbp.gov](https://bwt.cbp.gov), covering:
