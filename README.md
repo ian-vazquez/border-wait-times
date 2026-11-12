@@ -1,13 +1,16 @@
 # Border Wait Time Analysis
 
-An automated pipeline collecting live U.S. Customs and Border Protection wait-time
-data across El Paso's four ports of entry, running unattended via GitHub Actions.
+An automated pipeline that collects live U.S. Customs and Border Protection (CBP)
+wait-time data for El Paso's four ports of entry, plus a model that predicts
+wait times from port, lane, hour, and day of week.
 
 ## What this is
 
-This repo scrapes CBP's live border wait-time
-feeds hourly, accumulates a growing dataset with zero manual intervention, and
-analyzes patterns in crossing times across El Paso's bridges. 
+This repo scrapes CBP's live wait-time feeds on an hourly schedule through GitHub
+Actions, accumulates a growing dataset with no manual work, and analyzes crossing
+times across El Paso's bridges. GitHub's scheduler is best-effort, so actual
+collection is irregular (see Data quality notes).
+
 ## Data source
 
 Live RSS feeds from [bwt.cbp.gov](https://bwt.cbp.gov), covering:
@@ -16,25 +19,33 @@ Live RSS feeds from [bwt.cbp.gov](https://bwt.cbp.gov), covering:
 - Ysleta
 - Stanton DCL
 
-Data is fetched hourly and covers Commercial, Passenger, and Pedestrian lane
-categories, including General, Fast, Sentri, and Ready lane types.
+Each run records Commercial, Passenger, and Pedestrian lane categories, including
+General, Fast, Sentri, and Ready lane types. Results below use a frozen snapshot,
+`data/raw/snapshots/wait_times_snapshot 11-2-26.csv` (Aug 9 to Nov 2, 2026), so they
+can be reproduced even though the live file keeps growing.
 
 ## Findings
 
-- **Fastest bridge:** Stanton — ~4 minute average wait
-- **Slowest bridge:** Bridge of the Americas — ~35 minute average wait, over
-  8x higher than Stanton
-- **Hour-of-day pattern:** Bridge of the Americas is consistently the slowest
-  crossing throughout the day, while Stanton is consistently fastest. Paso Del
-  Norte and Ysleta cross paths around midday.
-- **Day-of-week pattern:** Similar shape to the hourly pattern, with Ysleta and
-  Paso Del Norte sometimes crossing throughout the week.
-- **General lane closures:** At Stanton and Ysleta, the General passenger lane
-  was closed in 100% of readings collected this week (93/93 at each port).
-  Bridge of the Americas and Paso Del Norte almost never showed this. Possible
+Based on the 8,860 readings with a numeric wait time in the Nov 2 snapshot.
+
+- **Fastest bridge:** Stanton, about 3.8 minutes on average.
+- **Slowest bridge:** Bridge of the Americas, about 30.4 minutes, roughly 8x
+  Stanton.
+- **Caveat on those averages:** they mix every lane type together. Stanton and
+  Ysleta's General passenger lanes are mostly closed, so those averages leave out
+  the longest-waiting lane. Compare lanes directly before concluding one bridge is
+  "faster."
+- **General passenger lane closures:** the General lane was closed in 97.2% of
+  Ysleta readings and 79.1% of Stanton readings, versus 3.4% at Bridge of the
+  Americas and 3.3% at Paso Del Norte (702 readings per port). Possible
   explanations include these ports routing general traffic through alternate
-  procedures not reflected in CBP's standard categories — worth investigating
-  further.
+  procedures not reflected in CBP's standard categories. This is worth
+  investigating further.
+- **Hour-of-day pattern:** Bridge of the Americas is consistently the slowest
+  crossing and Stanton the fastest. Paso Del Norte and Ysleta cross paths around
+  midday.
+- **Day-of-week pattern:** similar shape to the hourly pattern, with Ysleta and
+  Paso Del Norte sometimes crossing during the week.
 
 ![General lane closure rate by port](figures/general_lane_closure_by_port.png)
 ![Average wait time by hour, per port](figures/average_hour_wait_time_per_port.png)
@@ -42,68 +53,108 @@ categories, including General, Fast, Sentri, and Ready lane types.
 
 ## Data quality notes
 
-- Hours 2-5 and 12 have fewer readings across all ports due to an early
-  scraper bug (handling of CBP's "Pending" status), fixed August 15. Treat
-  these hours as lower-confidence.
-- Stanton has fewer readings than the other three ports throughout the week.
+- **Collection is irregular.** The workflow is scheduled hourly, but GitHub's cron
+  is best-effort and often runs late or skips runs. The Nov 2 snapshot has 702
+  collection runs over about 85 days (about 8 per day). The median gap between
+  runs is 2.2 hours, 285 gaps are longer than 3 hours, and the longest gap is 12.4
+  hours.
+- Hours 2-5 and 12 have fewer readings across all ports due to an early scraper
+  bug (handling of CBP's "Pending" status), fixed August 15. Treat these hours as
+  lower-confidence.
+- Numeric readings are uneven across ports because closed and not-applicable lanes
+  have no wait value. Only 8,860 of 19,656 rows are numeric.
 
 ## How it works
 
-- `scraper/collect.py` — fetches and parses the CBP feeds, handling four
-  distinct data states (numeric readings, closed lanes, not-applicable lane
-  types, and pending updates)
+- `scraper/collect.py` fetches and parses the CBP feeds, handling four distinct
+  data states (numeric readings, closed lanes, not-applicable lane types, and
+  pending updates).
+- `.github/workflows/scrape.yml` runs the scraper on an hourly schedule via GitHub
+  Actions and commits new data automatically.
+- `notebooks/exploratory_analysis.ipynb` is the analysis behind the findings above.
+- `notebooks/model.ipynb` is the prediction model.
+- `data/raw/wait_times.csv` is the accumulating dataset, and `data/raw/snapshots/`
+  holds frozen copies used for modeling.
 
-- `.github/workflows/scrape.yml` — runs the scraper hourly via GitHub
-  Actions and commits new data automatically, with zero manual intervention
-- `notebooks/exploratory_analysis.ipynb` — the analysis behind these findings
-- `data/raw/wait_times.csv` — the accumulating dataset
-
-<br><br>
 <br><br>
 
 # Border Wait Time Predictions
 
-Novel wait time predictions for each port, lane type, and hour for the population of El Paso.
+Predicts the wait time in minutes for a given port, lane category, lane type, hour
+of day, and day of week.
 
-## Data 
+## Data
 
-- Date Range: August 9th to September 28.
-- Only rows with a numeric wait time 6782/15064 were considered.
-- Features: port, category, lane type, and hour/day of week (encoded as sine/cosine pairs to ensure hours like 21:00 and 0:00 are neighbors).
+- Snapshot: `wait_times_snapshot 11-2-26.csv`, Aug 9 to Nov 2, 2026.
+- Only rows with a numeric wait time were used: 8,860 of 19,656 rows. Closed,
+  not-applicable, and pending rows have no wait value and were excluded.
+- Features: port, category, lane type, and hour and day of week. Hour and day of
+  week are encoded as sine/cosine pairs on a 24-hour and a 7-day cycle, so hours
+  like 23:00 and 0:00, or Sunday and Monday, are treated as neighbors.
 
 ## Tests
 
-- Split dataset into standard 80/20 training and testing sets by time to ensure neighboring rows landed together. 
+- The data was split 80/20 by time: the model trains on the earliest 80% (7,091 rows,
+  Aug 9 to Oct 4) and is scored on the latest 20% (1,769 rows, Oct 4 to Nov 2).
+  Splitting by time means the model never sees the period it is graded on, which
+  mimics real use, where it must predict the future from the past.
+- Score: mean absolute error (MAE), the average miss in minutes.
 
-## Results 
+## Results
 
-| Method | MAE (minutes) |
-|--------|---------------|
-| Training median for every row | 18.10 |
-| Port/hour lookup | 19.03 |
-| Linear Regression | 10.74 |
-| Port, category, lane type, and hour lookup | 9.81 | 
-| Random Forest | 8.07 |
+| Method | MAE (minutes) | Rows scored |
+|--------|---------------|-------------|
+| Training median for every row | 19.87 | 1,769 |
+| Port/hour lookup | 20.00 | 1,769 |
+| Linear Regression | 11.29 | 1,769 |
+| Port, category, lane type, and hour lookup | 9.52 | 1,767 |
+| Random Forest | 8.30 | 1,769 |
 
-## Takeaways 
+Two test rows had no matching group in the training data, so they are left out of
+the port, category, lane type, and hour lookup only. The effect on its score is
+negligible.
 
-- More features usually indicated higher accuracy
-- Random forest displayed mild overfitting (5.14 vs 8.07)
+Error split by lane. General passenger lanes are the longest waits (average 50.9
+minutes in the test window, 258 rows); all other lanes average 17.6 minutes (1,511
+rows).
 
-## Limitations 
+| Method | General passenger lanes MAE | All other lanes MAE |
+|--------|-----------------------------|---------------------|
+| Training median for every row | 42.95 | 15.93 |
+| Linear Regression | 19.46 | 9.89 |
+| Port, category, lane type, and hour lookup | 16.96 | not computed |
+| Random Forest | 13.79 | 7.36 |
 
-- 7 weeks of data
-- One train/test split
-- Collection gaps due to GitHub cron scheduling
-- No tuning
+## Takeaways
+
+- Random Forest cut error about 58% below the median guess (19.87 to 8.30).
+- A lookup by port and hour did no better than a flat median guess (20.00 vs
+  19.87). Lane type matters: it separates lanes that average about 3 minutes
+  (Sentri) from lanes that average about 50 (General passenger).
+- The gap between Random Forest and the best simple lookup is small overall (8.30
+  vs 9.52) but wider on General passenger lanes (13.79 vs 16.96). The model helps
+  most where waits are longest.
+- Random Forest is still off by about 14 minutes on General passenger lanes, where
+  the average wait is about 51. The single overall MAE understates how hard those
+  lanes are to predict.
+- Random Forest overfits. Its training error is 5.64 versus 8.30 on test data, so
+  test error is about 47% higher. No tuning has been done yet.
+
+## Limitations
+
+- About 12 weeks of data (85 days), with irregular gaps in collection.
+- The test window is only the most recent 4 weeks, so results say nothing about
+  holidays or other seasons.
+- One train/test split, so there is no measure of how stable the scores are.
+- No hyperparameter tuning.
+- The General passenger lane split covers only 258 test rows, so those numbers are
+  noisier than the overall ones.
 
 ## Next Steps
 
-- More weeks of data from an external trigger for steadier collection.
-- Further testing with different prediction models
-
-
-
-
-
-
+- Report error per port, and per lane type beyond the General passenger split.
+- Limit tree depth and use `TimeSeriesSplit` cross-validation to check how much the
+  scores can be trusted.
+- Add lag features (the previous reading) and compare against a "same as last
+  reading" baseline.
+- Move collection to an external trigger for steadier cadence.
